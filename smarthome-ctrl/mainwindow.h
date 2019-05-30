@@ -56,10 +56,10 @@ private:
     const QString smarthomeTopic = "smarthome/#";
     const QString gongTopic = "smarthome/klingel/taste";
 
-    #define NB_DEVICES 2
+    #define NB_DEVICES 6
     /*                          basic   th10 */
-    const QString device[NB_DEVICES] = {"4093", "2531"};
-    const QString deviceName[NB_DEVICES] = {"Basic", "TH10"};
+    const QString device[NB_DEVICES] = {"0616", "2531", "3424", "3432", "6816", "7236"};
+    const QString deviceName[NB_DEVICES] = {"Basic1", "TH10","Basic3","Basic4","Basic5","Basic6"};
 
     const QString powerTopic = "POWER";
     const QString sensorTopic = "SENSOR";

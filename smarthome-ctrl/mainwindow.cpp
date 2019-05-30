@@ -50,6 +50,9 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }
 }
 
+/*
+ * Timer
+ */
 void MainWindow::setSwitchState()
 {
     QString dev = deviceName[m_switchNr];
@@ -280,7 +283,12 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
 {
     int idx, bidx, eidx, fidx;
     QByteArray tmr;
-    bool pbool = false;
+    bool pbool;
+    QCheckBox *pCheckBox = nullptr;
+    QLabel *pLabelT = nullptr;
+    QLabel *pLabelH = nullptr;
+    QProgressBar *pProgressT = nullptr;
+    QProgressBar *pProgressH = nullptr;
 
     QString content =
 //                  QDateTime::currentDateTime().toString()
@@ -298,24 +306,63 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
 
     qDebug() << content;
 
+    /*
+     * Select module
+     */
+    if (topic.name().contains(device[0]) == true) {
+        pCheckBox = ui->cBoxInfo_1;
+        pLabelT = ui->labelTemp_1;
+        pProgressT = ui->pBarTemp_1;
+    }
+    else if (topic.name().contains(device[1]) == true) {
+        pCheckBox = ui->cBoxInfo_2;
+        pLabelT = ui->labelTemp_2;
+        pProgressT = ui->pBarTemp_2;
+        pLabelH = ui->labelHum_2;
+        pProgressH = ui->pBarHum_2;
+    }
+    else if (topic.name().contains(device[2]) == true) {
+        pCheckBox = ui->cBoxInfo_3;
+        pLabelT = ui->labelTemp_3;
+        pProgressT = ui->pBarTemp_3;
+    }
+    else if (topic.name().contains(device[3]) == true) {
+        pCheckBox = ui->cBoxInfo_4;
+        pLabelT = ui->labelTemp_4;
+        pProgressT = ui->pBarTemp_4;
+    }
+    else if (topic.name().contains(device[4]) == true) {
+        pCheckBox = ui->cBoxInfo_5;
+        pLabelT = ui->labelTemp_5;
+        pProgressT = ui->pBarTemp_5;
+    }
+    else if (topic.name().contains(device[5]) == true) {
+        pCheckBox = ui->cBoxInfo_6;
+        pLabelT = ui->labelTemp_6;
+        pProgressT = ui->pBarTemp_6;
+    }
+
+    /*
+     * Switch
+     */
     if (topic.name().contains(powerTopic) == true) {
+        qDebug() << "POWER ON received";
+        pbool = false;
         if (message.contains("ON")) {
-            qDebug() << "POWER ON received";
             pbool = true;
         }
         else if (message.contains("OFF")) {
             qDebug() << "POWER OFF received";
-        }
-        if (topic.name().contains(device[0]) == true) {
-            ui->cBoxBasic->setChecked(pbool);
-            //ui->cBoxBasic->setTristate(pbool);
-            ui->cBoxIBasic->setChecked(pbool);
-        }
-        if (topic.name().contains(device[1]) == true) {
-            ui->cBoxTH10->setChecked(pbool);
-            ui->cBoxITH10->setChecked(pbool);
+        }     
+        if (pCheckBox) {
+            //ui->cBoxBasic->setChecked(pbool);
+            pCheckBox->setChecked(pbool);
         }
     }
+
+    /*
+     * Label
+     */
     if ((topic.name().contains(sensorTopic) == true)
        || (topic.name().contains(sensor8Topic) == true)) {
         QByteArray temp, hum;
@@ -330,11 +377,13 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
 
         if ((fidx < eidx) && (fidx >= 0)) eidx = fidx;
         temp.append(message.mid(bidx+1), eidx - bidx - 1);
-        ui->pBarTemp->setValue(temp.toInt());
+        if (pProgressT)
+            pProgressT->setValue(temp.toInt());
         temp.append(" °C");
-        ui->labelTemp->setText(temp);
+        if (pLabelT)
+            pLabelT->setText(temp);
 
-        qDebug() << "SENSOR received temp" << temp << " - " << ui->pBarTemp->value();
+        qDebug() << "SENSOR received temp" << temp << " - " << temp.toInt();
 
         idx = message.indexOf("Humidity");
         bidx = message.indexOf(":", idx);
@@ -345,12 +394,18 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
 
         if ((fidx < eidx) && (fidx >= 0)) eidx = fidx;
         hum.append(message.mid(bidx+1), eidx - bidx - 1);
-        ui->pBarHum->setValue(hum.toInt());
+        if (pProgressH)
+            pProgressH->setValue(hum.toInt());
         hum.append(" %");
-        ui->labelHum->setText(hum);
+        if (pLabelH)
+            pLabelH->setText(hum);
 
-        qDebug() << "SENSOR received hum" << hum << " - " << ui->pBarHum->value();
+        qDebug() << "SENSOR received hum" << hum << " - " << hum.toInt();
     }
+
+    /*
+     * Status
+     */
     if (topic.name().contains(statusTopic) == true) {
         QByteArray pow;
         qDebug() << "STATUS received" << QString(message);
@@ -361,6 +416,7 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
             return;
 
         pow.append(message.mid(bidx+1), 1);
+        pbool = false;
         if (pow == "1")
             pbool = true;
         else if (pow != "0")
@@ -368,15 +424,9 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
 
         qDebug() << "STATUS received" << pow;
 
-        /* basic */
-        if (topic.name().contains(device[0]) == true) {
-            ui->cBoxBasic->setChecked(pbool);
-            ui->cBoxIBasic->setChecked(pbool);
-        }
-        /* th10 */
-        else if (topic.name().contains(device[1]) == true) {
-            ui->cBoxTH10->setChecked(pbool);
-            ui->cBoxITH10->setChecked(pbool);
+        if (pCheckBox) {
+            //ui->cBoxBasic->setChecked(pbool);
+            pCheckBox->setChecked(pbool);
         }
     }
     if (topic.name().contains(stateTopic) == true) {
@@ -541,12 +591,15 @@ void MainWindow::messageReceived(const QByteArray &message, const QMqttTopicName
          * {\"Timers\":\"OFF\"}\n"
          */
         else if (message.indexOf("Timers") >= 0) {
+            bidx = message.indexOf("Timers");
+            //idx = message.indexOf(":", bidx);
             idx = message.indexOf(":");
             eidx = message.indexOf("}", bidx);
             if ((bidx < 0) || (eidx < 0))
                 return;
             tmr.clear();
             tmr.append(message.mid(bidx+3), 2);
+            pbool = false;
             if (tmr == "ON") {
                 pbool = true;
             }
