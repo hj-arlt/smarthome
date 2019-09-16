@@ -6,7 +6,7 @@
 
 QT = core gui mqtt
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets charts
 
 TARGET = smarthome-ctrl
 TEMPLATE = app
@@ -52,5 +52,10 @@ if(linux-g++) {
     mui.files       = mainwindow.ui
     mui.path        = /home/pi/projects
 
-    INSTALLS        = target mui
+    INSTALLS        = target
 }
+
+DISTFILES +=
+
+RESOURCES += \
+    img.qrc

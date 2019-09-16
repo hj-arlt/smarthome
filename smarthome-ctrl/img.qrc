@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/button_black.png</file>
+        <file>icons/button_blue.png</file>
+        <file>icons/kugelbirne_off.png</file>
+        <file>icons/kugelbirne_on.png</file>
+        <file>icons/infrared_off.png</file>
+        <file>icons/infrared_on.png</file>
+        <file>icons/clock_on.png</file>
+        <file>icons/clock_off.png</file>
+    </qresource>
+</RCC>
